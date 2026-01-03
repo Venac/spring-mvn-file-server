@@ -1,0 +1,25 @@
+[
+  {
+    "name": "rs.sf.fileserver.model.FileResponse",
+    "queryAllDeclaredConstructors" : true,
+    "queryAllPublicConstructors" : true,
+    "queryAllDeclaredMethods" : true,
+    "queryAllPublicMethods" : true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true,
+    "methods": [
+      {
+        "name": "path",
+        "parameterTypes": []
+      },
+      {
+        "name": "encodedPath",
+        "parameterTypes": []
+      },
+      {
+        "name": "isDir",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

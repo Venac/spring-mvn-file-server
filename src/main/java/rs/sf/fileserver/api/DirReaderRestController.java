@@ -57,14 +57,14 @@ public class DirReaderRestController {
     }
 
     private String format(String string) {
-        return string/* + " ===> " + encode(string)*/;
+        return string + " ===> " + encode(string);
     }
 
     private List<FileResponse> getFilePathsFormatted(Path dir) {
         List<FileResponse> files = new ArrayList<>();
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
-            stream.forEach(file -> {
-                FileResponse  fileResponse = new FileResponse(file.toFile().getAbsolutePath(), file.toFile().isDirectory());
+            stream.forEach(path -> {
+                FileResponse  fileResponse = new FileResponse(path.toFile().getAbsolutePath(), encode(path.toFile().getAbsolutePath()), path.toFile().isDirectory());
                 files.add(fileResponse);
             });
         } catch (IOException e) {

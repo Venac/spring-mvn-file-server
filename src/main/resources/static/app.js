@@ -6,7 +6,7 @@ displayBtn.addEventListener('click', async function () {
 });
 
 async function readParentDir() {
-    fetch(`http://localhost:8080/dir/parent`)
+    fetch(`http://192.168.0.50:8080/dir/parent`)
         .then(response => {
             if (!response.ok) {
                 throw new Error("Network response was not ok");
@@ -24,11 +24,14 @@ async function readParentDir() {
 
 function populateSingleItem(item) {
     const tr = document.createElement("tr");
-    const tdItem = document.createElement("td");
+    const tdPath = document.createElement("td");
+    const tdEncodedPath = document.createElement("td");
     const tdCd = document.createElement("td");
 
-    tdItem.innerText = item.path;
-    tr.appendChild(tdItem);
+    tdPath.innerText = item.path;
+    tr.appendChild(tdPath);
+    tdEncodedPath.innerText = item.encodedPath;
+    tr.appendChild(tdEncodedPath);
 
     const btn = document.createElement("button");
     btn.innerHTML = item.isDir === true ? "enter" : "download";
@@ -92,7 +95,7 @@ async function readDir(path) {
     const params = new URLSearchParams({
         path: path
     }).toString();
-    fetch(`http://localhost:8080/dir/absolute?${params}`)
+    fetch(`http://192.168.0.50:8080/dir/absolute?${params}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error("Network response was not ok");
@@ -112,7 +115,7 @@ async function downloadFile(filename) {
     const params = new URLSearchParams({
         filename: filename
     }).toString();
-    const response = await fetch(`http://localhost:8080/download/absolute?${params}`, {
+    const response = await fetch(`http://192.168.0.50:8080/download/absolute?${params}`, {
         method: 'GET',
         headers: {
             'Accept': 'application/octet-stream'
