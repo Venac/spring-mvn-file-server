@@ -2,6 +2,7 @@ package rs.sf.fileserver.api;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -55,10 +57,15 @@ public class FileDownloadRestController {
 
     private ResponseEntity<StreamingResponseBody> buildResponseEntity(String filename, Path path, StreamingResponseBody streamingResponseBody) {
         try {
+
+            ContentDisposition contentDisposition = ContentDisposition
+                    .attachment()
+                    .filename(filename, StandardCharsets.UTF_8)
+                    .build();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentDisposition(contentDisposition);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, """
-                                attachment; filename="%s"
-                            """.formatted(filename))
+                    .headers(headers)
                     .contentLength(Files.size(path))
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .body(streamingResponseBody);

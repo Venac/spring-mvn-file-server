@@ -6,117 +6,115 @@ displayBtn.addEventListener('click', async function () {
 });
 
 async function readParentDir() {
-//            const params = new URLSearchParams({
-//                name: "alex"
-//            });
-            fetch(`http://localhost:8080/dir/parent`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("Network response was not ok");
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log(data);
-                    for (let i = 0; i < data.length; i++) {
-                        populateData(data[i]);
-                    }
-                })
-                .catch(error => {
-                    console.error("Fetch error:", error);
-                });
-}
-
-async function displayAllEmployees() {
-    try {
-        saveInfoParagraph.innerText = "";
-        const res = await axios.get('http://localhost:8080/employees');
-        const data = res.data;
-        // TODO is data.length === 0, display no employees found in db
-        for (let i = 0; i < data.length; i++) {
-            populateEmployeeData(data[i]);
-        }
-    } catch (e) {
-        console.log(e);
-    }
+    fetch(`http://localhost:8080/dir/parent`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            return response.json();
+        })
+        .then(data => {
+            removeAllElements();
+            for (let i = 0; i < data.length; i++) {
+                populateData(data[i]);
+            }
+        })
+        .catch(error => {
+            console.error("Fetch error:", error);
+        });
 }
 
 function populateData(item) {
-    console.log(item);
     const tr = document.createElement("tr");
     const tdItem = document.createElement("td");
     const tdCd = document.createElement("td");
 
-    tdItem.innerText = item;
+    tdItem.innerText = item.path;
     tr.appendChild(tdItem);
 
-    const cdBtn = document.createElement("button");
-    cdBtn.innerHTML = "cd";
-    cdBtn.addEventListener('click', async function () {
-        return readDir(item)
-    });
+    const btn = document.createElement("button");
+    btn.innerHTML = item.isDir === true ? "enter" : "download";
+    if (item.isDir) {
+        btn.addEventListener('click', async function () {
+            return readDir(item.path)
+        });
+    } else {
+        btn.addEventListener('click', async function () {
+            return downloadFile(item.path)
+        });
+    }
+    tdCd.appendChild(btn);
 
-    tdCd.appendChild(cdBtn);
     tr.appendChild(tdCd);
 
     tbody.appendChild(tr);
 }
 
-function populateEmployeeData(employee) {
-    const tr = document.createElement("tr");
-    const tdId = document.createElement("td");
-    const tdFirstName = document.createElement("td");
-    const tdLastName = document.createElement("td");
-    const tdEdit = document.createElement("td");
-    const tdDelete = document.createElement("td");
-
-    tdId.innerText = employee.id;
-    tdFirstName.innerText = employee.firstName;
-    tdLastName.innerText = employee.lastName;
-    tr.setAttribute("id", employee.id);
-    tr.appendChild(tdId);
-    tr.appendChild(tdFirstName);
-    tr.appendChild(tdLastName);
-
-    const editBtn = document.createElement("button");
-    editBtn.innerHTML = "edit";
-    editBtn.addEventListener('click', async function () {
-        return editFunction(employee)
-    });
-    const deleteBtn = document.createElement("button");
-    deleteBtn.innerHTML = "delete";
-    deleteBtn.addEventListener('click', async function () {
-        return deleteFunction(employee);
-    });
-    editBttns.push(editBtn);
-    deleteBttns.push(deleteBtn);
-
-    tdEdit.appendChild(editBtn);
-    tdDelete.appendChild(deleteBtn);
-    tr.appendChild(tdEdit);
-    tr.appendChild(tdDelete);
-
-    tbody.appendChild(tr);
+async function readDir(path) {
+    removeAllElements();
+    const params = new URLSearchParams({
+        path: path
+    }).toString();
+    fetch(`http://localhost:8080/dir/absolute?${params}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            return response.json();
+        })
+        .then(data => {
+            for (let i = 0; i < data.length; i++) {
+                populateData(data[i]);
+            }
+        })
+        .catch(error => {
+            console.error("Fetch error:", error);
+        });
 }
 
-async function readDir(item) {
-                  const params = new URLSearchParams({
-                      path: item
-                  }).toString();
-    fetch(`http://localhost:8080/dir/absolute?${params}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error("Network response was not ok");
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log(data);
-                        for (let i = 0; i < data.length; i++) {
-                            populateData(data[i]);
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Fetch error:", error);
-                    });
+async function downloadFile(filename) {
+    removeAllElements();
+    const params = new URLSearchParams({
+        filename: filename
+    }).toString();
+    const response = await fetch(`http://localhost:8080/download/absolute?${params}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/octet-stream'
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error('Download failed');
+    }
+
+    const blob = await response.blob();
+
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    let contentDisposition = response.headers.get('Content-Disposition');
+    let file = getFilename(contentDisposition);
+    a.download = file;
+    document.body.appendChild(a);
+    a.click();
+
+    a.remove();
+    window.URL.revokeObjectURL(url);
+}
+
+function removeAllElements() {
+    for (let i = tbody.children.length - 1; i >= 0; i--) {
+        tbody.removeChild(tbody.children[i]);
+    }
+}
+
+function getFilename(disposition) {
+    const utf8Match = disposition.match(/filename\*\=UTF-8''(.+)/);
+    if (utf8Match) {
+        return decodeURIComponent(utf8Match[1]);
+    }
+
+    const asciiMatch = disposition.match(/filename="?([^"]+)"?/);
+    return asciiMatch ? asciiMatch[1] : 'download';
 }

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import rs.sf.fileserver.model.FileResponse;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +27,7 @@ public class DirReaderRestController {
     public ResponseEntity<?> readCurrentDir()
     {
         Path dir = Paths.get(System.getProperty("user.dir"));
-        List<String> files = getFilePathsFormatted(dir);
+        List<FileResponse> files = getFilePathsFormatted(dir);
         return ResponseEntity.ok().body(files);
     }
 
@@ -39,7 +40,7 @@ public class DirReaderRestController {
             parentDir = parentDir + "\\\\";
         }
         Path dir = Paths.get(parentDir);
-        List<String> files = getFilePathsFormatted(dir);
+        List<FileResponse> files = getFilePathsFormatted(dir);
         return ResponseEntity.ok().body(files);
     }
 
@@ -47,7 +48,7 @@ public class DirReaderRestController {
     public ResponseEntity<?> readAbsoluteDir(@RequestParam("path") String path)
     {
         Path dir = Paths.get(path);
-        List<String> files = getFilePathsFormatted(dir);
+        List<FileResponse> files = getFilePathsFormatted(dir);
         return ResponseEntity.ok().body(files);
     }
 
@@ -59,10 +60,13 @@ public class DirReaderRestController {
         return string/* + " ===> " + encode(string)*/;
     }
 
-    private List<String> getFilePathsFormatted(Path dir) {
-        List<String> files = new ArrayList<>();
+    private List<FileResponse> getFilePathsFormatted(Path dir) {
+        List<FileResponse> files = new ArrayList<>();
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
-            stream.forEach(file -> files.add(format(file.toAbsolutePath().toString())));
+            stream.forEach(file -> {
+                FileResponse  fileResponse = new FileResponse(file.toFile().getAbsolutePath(), file.toFile().isDirectory());
+                files.add(fileResponse);
+            });
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
