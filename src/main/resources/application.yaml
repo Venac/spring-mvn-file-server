@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: spring-file-server-maven
+  mvc:
+    async:
+      request-timeout: 7200s
