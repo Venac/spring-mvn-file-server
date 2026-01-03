@@ -1,3 +1,12 @@
+// const ipAddress = "http://192.168.0.50";
+// document.addEventListener("DOMContentLoaded", () => {
+//     const favoriteColor = prompt("What is your favorite color?");
+//     console.log(favoriteColor);
+//   });
+const ipAddress = "http://" + prompt("Enter the server IP address");
+const port = "8080";
+const downloadAbs = "/download/absolute?filename=";
+
 const displayBtn = document.querySelector("#display");
 const tbody = document.querySelector("#dir_contents_body")
 
@@ -6,7 +15,7 @@ displayBtn.addEventListener('click', async function () {
 });
 
 async function readParentDir() {
-    fetch(`http://192.168.0.50:8080/dir/parent`)
+    fetch(ipAddress + ":" + port + `/dir/parent`)
         .then(response => {
             if (!response.ok) {
                 throw new Error("Network response was not ok");
@@ -23,41 +32,55 @@ async function readParentDir() {
 }
 
 function populateSingleItem(item) {
-    const tr = document.createElement("tr");
+    const tableRow = document.createElement("tr");
     const tdPath = document.createElement("td");
-    const tdEncodedPath = document.createElement("td");
-    const tdCd = document.createElement("td");
-
+    // const aEncodedPath = document.createElement("a");
     tdPath.innerText = item.path;
-    tr.appendChild(tdPath);
-    tdEncodedPath.innerText = item.encodedPath;
-    tr.appendChild(tdEncodedPath);
+    tableRow.appendChild(tdPath);
+    // let encodedPathValue = ipAddress + ":" + port + downloadAbs + item.encodedPath;
+    // console.log("encodedPathValue " + encodedPathValue);
+    // aEncodedPath.innerHTML = "Download";
+    // aEncodedPath.href = encodedPathValue;
+    // // tdEncodedPath.innerText = item.encodedPath;
+    // tdEncodedPath.appendChild(aEncodedPath);
 
-    const btn = document.createElement("button");
-    btn.innerHTML = item.isDir === true ? "enter" : "download";
     if (item.isDir) {
+        const tdChangeDir = document.createElement("td");
+        const btn = document.createElement("button");
+        btn.innerHTML = "enter";
         btn.addEventListener('click', async function () {
             return readDir(item.path)
         });
+        tdChangeDir.appendChild(btn);
+        tableRow.appendChild(tdChangeDir);
     } else {
-        btn.addEventListener('click', async function () {
-            return downloadFile(item.path)
-        });
+        const tdEncodedPath = document.createElement("td");
+        const aEncodedPath = document.createElement("a");
+        const encodedPathValue = ipAddress + ":" + port + downloadAbs + item.encodedPath;
+        console.log("encodedPathValue " + encodedPathValue);
+        aEncodedPath.innerHTML = "Download";
+        aEncodedPath.href = encodedPathValue;
+        // tdEncodedPath.innerText = item.encodedPath;
+        tdEncodedPath.appendChild(aEncodedPath);
+        tableRow.appendChild(tdEncodedPath);
+        // btn.addEventListener('click', async function () {
+        //     return downloadFile(item.path)
+        // });
     }
-    tdCd.appendChild(btn);
+    // tdChangeDir.appendChild(btn);
 
-    tr.appendChild(tdCd);
+    // tableRow.appendChild(tdChangeDir);
 
-    tbody.appendChild(tr);
+    tbody.appendChild(tableRow);
 }
 
 function populateParent(path) {
-    const tr = document.createElement("tr");
+    const tableRow = document.createElement("tr");
     const tdItem = document.createElement("td");
-    const tdCd = document.createElement("td");
+    const tdChangeDir = document.createElement("td");
 
     tdItem.innerText = "../";
-    tr.appendChild(tdItem);
+    tableRow.appendChild(tdItem);
 
     const btn = document.createElement("button");
     btn.innerHTML = "enter";
@@ -74,11 +97,11 @@ function populateParent(path) {
             return readDir(twoLevels);
         });
     }
-    tdCd.appendChild(btn);
+    tdChangeDir.appendChild(btn);
 
-    tr.appendChild(tdCd);
+    tableRow.appendChild(tdChangeDir);
 
-    tbody.appendChild(tr);
+    tbody.appendChild(tableRow);
 }
 
 function populateData(data) {
@@ -95,7 +118,7 @@ async function readDir(path) {
     const params = new URLSearchParams({
         path: path
     }).toString();
-    fetch(`http://192.168.0.50:8080/dir/absolute?${params}`)
+    fetch(ipAddress + ":" + port + `/dir/absolute?${params}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error("Network response was not ok");
@@ -115,7 +138,7 @@ async function downloadFile(filename) {
     const params = new URLSearchParams({
         filename: filename
     }).toString();
-    const response = await fetch(`http://192.168.0.50:8080/download/absolute?${params}`, {
+    const response = await fetch(ipAddress + ":" + port + `/download/absolute?${params}`, {
         method: 'GET',
         headers: {
             'Accept': 'application/octet-stream'
