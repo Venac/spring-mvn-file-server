@@ -15,16 +15,14 @@ async function readParentDir() {
         })
         .then(data => {
             removeAllElements();
-            for (let i = 0; i < data.length; i++) {
-                populateData(data[i]);
-            }
+            populateData(data);
         })
         .catch(error => {
             console.error("Fetch error:", error);
         });
 }
 
-function populateData(item) {
+function populateSingleItem(item) {
     const tr = document.createElement("tr");
     const tdItem = document.createElement("td");
     const tdCd = document.createElement("td");
@@ -50,6 +48,45 @@ function populateData(item) {
     tbody.appendChild(tr);
 }
 
+function populateParent(path) {
+    const tr = document.createElement("tr");
+    const tdItem = document.createElement("td");
+    const tdCd = document.createElement("td");
+
+    tdItem.innerText = "../";
+    tr.appendChild(tdItem);
+
+    const btn = document.createElement("button");
+    btn.innerHTML = "enter";
+    let separator = "";
+    if (path.includes('/')) {
+        separator = '/';
+    } else {
+        separator = '\\';
+    }
+    if (separator !== "") {
+        let oneLevel = path.substring(0, path.lastIndexOf(separator));
+        let twoLevels = oneLevel.substring(0, oneLevel.lastIndexOf(separator));
+        btn.addEventListener('click', async function () {
+            return readDir(twoLevels);
+        });
+    }
+    tdCd.appendChild(btn);
+
+    tr.appendChild(tdCd);
+
+    tbody.appendChild(tr);
+}
+
+function populateData(data) {
+    if (data.length > 0) {
+        populateParent(data[0].path);
+    }
+    for (let i = 0; i < data.length; i++) {
+        populateSingleItem(data[i]);
+    }
+}
+
 async function readDir(path) {
     removeAllElements();
     const params = new URLSearchParams({
@@ -63,9 +100,7 @@ async function readDir(path) {
             return response.json();
         })
         .then(data => {
-            for (let i = 0; i < data.length; i++) {
-                populateData(data[i]);
-            }
+            populateData(data);
         })
         .catch(error => {
             console.error("Fetch error:", error);

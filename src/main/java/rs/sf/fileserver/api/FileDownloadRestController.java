@@ -1,7 +1,5 @@
 package rs.sf.fileserver.api;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -23,8 +21,6 @@ import java.nio.file.Paths;
 @RestController
 @RequestMapping("/download")
 public class FileDownloadRestController {
-
-    public static final Logger log = LoggerFactory.getLogger(FileDownloadRestController.class);
 
     @GetMapping("/parent")
     public ResponseEntity<StreamingResponseBody> downloadFileFromCurrent(@RequestParam("filename") String filename) {
