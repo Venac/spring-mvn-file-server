@@ -133,36 +133,36 @@ async function readDir(path) {
         });
 }
 
-async function downloadFile(filename) {
-    removeAllElements();
-    const params = new URLSearchParams({
-        filename: filename
-    }).toString();
-    const response = await fetch(ipAddress + ":" + port + `/download/absolute?${params}`, {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/octet-stream'
-        }
-    });
+// async function downloadFile(filename) {
+//     removeAllElements();
+//     const params = new URLSearchParams({
+//         filename: filename
+//     }).toString();
+//     const response = await fetch(ipAddress + ":" + port + `/download/absolute?${params}`, {
+//         method: 'GET',
+//         headers: {
+//             'Accept': 'application/octet-stream'
+//         }
+//     });
 
-    if (!response.ok) {
-        throw new Error('Download failed');
-    }
+//     if (!response.ok) {
+//         throw new Error('Download failed');
+//     }
 
-    const blob = await response.blob();
+//     const blob = await response.blob();
 
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    let contentDisposition = response.headers.get('Content-Disposition');
-    let file = getFilename(contentDisposition);
-    a.download = file;
-    document.body.appendChild(a);
-    a.click();
+//     const url = window.URL.createObjectURL(blob);
+//     const a = document.createElement('a');
+//     a.href = url;
+//     let contentDisposition = response.headers.get('Content-Disposition');
+//     let file = getFilename(contentDisposition);
+//     a.download = file;
+//     document.body.appendChild(a);
+//     a.click();
 
-    a.remove();
-    window.URL.revokeObjectURL(url);
-}
+//     a.remove();
+//     window.URL.revokeObjectURL(url);
+// }
 
 function removeAllElements() {
     for (let i = tbody.children.length - 1; i >= 0; i--) {
